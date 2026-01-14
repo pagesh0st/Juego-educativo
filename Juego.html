@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Juego Matemático</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#74ebd5,#9face6);
+  text-align:center;
+  margin:0;
+}
+
+/* ===== MENÚ ===== */
+#menu{
+  margin-top:80px;
+  background:white;
+  display:inline-block;
+  padding:30px 50px;
+  border-radius:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,.2);
+}
+
+select,button,input{
+  padding:10px;
+  font-size:16px;
+  margin:8px;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  background:#4a90e2;
+  color:white;
+  cursor:pointer;
+}
+
+/* ===== JUEGO ===== */
+#juego{display:none;}
+
+.info{
+  display:flex;
+  justify-content:center;
+  gap:30px;
+  font-size:18px;
+}
+
+#zona{
+  display:flex;
+  justify-content:center;
+  gap:25px;
+  margin-top:20px;
+}
+
+/* ===== TABLERO ===== */
+#tablero{
+  display:grid;
+  grid-template-columns:repeat(6,80px);
+  gap:10px;
+}
+
+.carta{
+  width:80px;
+  height:80px;
+  background-image:url("imagen_juego.png");
+  background-size:cover;
+  background-position:center;
+  font-size:26px;
+  color:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.carta.abierta{
+  background:none;
+  background:#ecf0f1;
+  color:black;
+  font-weight:bold;
+}
+
+.carta.fija{
+  background:none;
+  background:#2ecc71;
+  color:black;
+  font-weight:bold;
+  cursor:default;
+}
+
+/* ===== REGISTRO ===== */
+#registro{
+  width:230px;
+  background:#fdeff9;
+  padding:15px;
+  border-radius:15px;
+  box-shadow:0 8px 15px rgba(0,0,0,.2);
+}
+
+#registro ul{
+  list-style:none;
+  padding:0;
+}
+
+#registro li{
+  background:#e0f7fa;
+  margin:6px 0;
+  padding:6px;
+  border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== MENÚ ===== -->
+<div id="menu">
+  <h1>🎮 Juego Matemático</h1>
+
+  <p>Operación</p>
+  <select id="operacion">
+    <option value="suma">Suma</option>
+    <option value="multi">Multiplicación</option>
+  </select>
+
+  <p>Dificultad</p>
+  <select id="dificultad">
+    <option value="5">Fácil</option>
+    <option value="10">Normal</option>
+    <option value="20">Difícil</option>
+  </select><br>
+
+  <button onclick="empezar()">Empezar</button>
+</div>
+
+<!-- ===== JUEGO ===== -->
+<div id="juego">
+  <h2 id="titulo"></h2>
+
+  <div class="info">
+    <div>⏱️ Tiempo: <span id="tiempo">180</span>s</div>
+    <button onclick="volverMenu()">😓 Me rindo</button>
+  </div>
+
+  <div id="zona">
+    <div id="tablero"></div>
+
+    <div id="registro">
+      <h3>📝 Operaciones</h3>
+      <ul id="lista"></ul>
+    </div>
+  </div>
+
+  <br>
+  <input type="number" id="respuesta" placeholder="Respuesta">
+  <button onclick="verificar()">Verificar</button>
+
+  <p id="mensaje"></p>
+</div>
+
+<script>
+let seleccionadas=[];
+let operacion,max;
+let cartasCorrectas=0;
+let tiempo=180;
+let reloj;
+
+const tablero=document.getElementById("tablero");
+
+/* ===== EMPEZAR ===== */
+function empezar(){
+  operacion=document.getElementById("operacion").value;
+  max=Number(document.getElementById("dificultad").value);
+
+  document.getElementById("menu").style.display="none";
+  document.getElementById("juego").style.display="block";
+  document.getElementById("lista").innerHTML="";
+  document.getElementById("mensaje").textContent="";
+  cartasCorrectas=0;
+
+  document.getElementById("titulo").textContent =
+    operacion=="suma" ? "➕ Suma" : "✖️ Multiplicación";
+
+  crearTablero();
+  iniciarTiempo();
+}
+
+/* ===== TABLERO ===== */
+function crearTablero(){
+  tablero.innerHTML="";
+  seleccionadas=[];
+
+  for(let i=0;i<36;i++){
+    let n=Math.floor(Math.random()*max)+1;
+    let c=document.createElement("div");
+    c.className="carta";
+    c.textContent=n;
+    c.dataset.valor=n;
+    c.dataset.fija="no";
+
+    c.onclick=function(){
+      if(seleccionadas.length<2 && c.dataset.fija=="no"){
+        c.classList.add("abierta");
+        seleccionadas.push(c);
+      }
+    };
+    tablero.appendChild(c);
+  }
+}
+
+/* ===== VERIFICAR ===== */
+function verificar(){
+  if(seleccionadas.length!=2) return;
+
+  let a=Number(seleccionadas[0].dataset.valor);
+  let b=Number(seleccionadas[1].dataset.valor);
+  let correcta=operacion=="suma"?a+b:a*b;
+  let resp=Number(document.getElementById("respuesta").value);
+
+  if(resp==correcta){
+    seleccionadas.forEach(c=>{
+      c.classList.remove("abierta");
+      c.classList.add("fija");
+      c.dataset.fija="si";
+      cartasCorrectas++;
+    });
+
+    let signo=operacion=="suma"?"+":"×";
+    let li=document.createElement("li");
+    li.textContent=`${a} ${signo} ${b} = ${correcta}`;
+    document.getElementById("lista").appendChild(li);
+
+    if(cartasCorrectas==36){
+      clearInterval(reloj);
+      document.getElementById("mensaje").innerHTML=
+        "🎉 ¡Ganaste!<br><button onclick='volverMenu()'>🏠 Menú</button>";
+    }
+  }else{
+    seleccionadas.forEach(c=>c.classList.remove("abierta"));
+  }
+
+  seleccionadas=[];
+  document.getElementById("respuesta").value="";
+}
+
+/* ===== TIEMPO ===== */
+function iniciarTiempo(){
+  tiempo=180;
+  document.getElementById("tiempo").textContent=tiempo;
+
+  reloj=setInterval(function(){
+    tiempo--;
+    document.getElementById("tiempo").textContent=tiempo;
+    if(tiempo<=0){
+      clearInterval(reloj);
+      alert("⏰ Tiempo agotado");
+      volverMenu();
+    }
+  },1000);
+}
+
+/* ===== MENÚ ===== */
+function volverMenu(){
+  clearInterval(reloj);
+  document.getElementById("juego").style.display="none";
+  document.getElementById("menu").style.display="block";
+}
+</script>
+
+</body>
+</html>
