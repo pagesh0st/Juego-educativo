@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego Interactivo de Matemáticas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section {
+            background-color: white;
+            margin-bottom: 20px;
+            padding: 30px;
+        }
+
+        .section h2 {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            margin: -30px -30px 20px -30px;
+            font-size: 1.8em;
+        }
+
+        .section h3 {
+            background-color: #95a5a6;
+            color: white;
+            padding: 10px;
+            margin: 20px -30px 15px -30px;
+            font-size: 1.3em;
+        }
+
+        .menu-item {
+            background-color: #ecf0f1;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 5px solid #3498db;
+        }
+
+        .menu-item strong {
+            color: #2c3e50;
+        }
+
+        .tablero {
+            background-color: #e8f4f8;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .operacion {
+            display: inline-block;
+            background-color: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            font-weight: bold;
+        }
+
+        .mensaje {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .mensaje.ganador {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .mensaje.perdedor {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .mensaje.acierto {
+            background-color: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+
+        .mensaje.error {
+            background-color: #ffe0e0;
+            border-left-color: #e74c3c;
+        }
+
+        .objetivo {
+            background-color: #e8f5e9;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 5px solid #4caf50;
+        }
+
+        .beneficio {
+            background-color: #f3e5f5;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .beneficio h4 {
+            background-color: #9c27b0;
+            color: white;
+            padding: 10px;
+            margin: -20px -20px 15px -20px;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        .destacado {
+            background-color: #fff9c4;
+            padding: 20px;
+            margin: 20px 0;
+            border: 3px solid #fbc02d;
+        }
+
+        .grid-demo {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 5px;
+            margin: 15px 0;
+        }
+
+        .grid-cell {
+            background-color: #3498db;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .section h2 {
+                margin: -20px -20px 15px -20px;
+                font-size: 1.5em;
+            }
+
+            .section h3 {
+                margin: 15px -20px 10px -20px;
+            }
+
+            .grid-demo {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Juego Interactivo de Matemáticas</h1>
+        <p>Informe de Funcionamiento y Objetivos</p>
+    </header>
+
+    <div class="container">
+        <!-- MENÚ DE INICIO -->
+        <div class="section">
+            <h2>MENÚ DE INICIO</h2>
+            <div class="menu-item">
+                <strong>Campo de entrada:</strong> Escribe tu nombre de usuario para personalizar tu partida
+            </div>
+            <div class="menu-item">
+                <strong>Selector de dificultad:</strong> Elige el nivel que se adapte a tus necesidades
+            </div>
+            <div class="menu-item">
+                <strong>Botón principal:</strong> "INICIAR PARTIDA"
+            </div>
+            <div class="menu-item">
+                <strong>Opciones adicionales:</strong> Ver historial de partidas, ajustes de sonido y accesibilidad
+            </div>
+        </div>
+
+        <!-- CÓMO FUNCIONA -->
+        <div class="section">
+            <h2>¿CÓMO FUNCIONA EL JUEGO?</h2>
+            
+            <h3>1. TABLERO PRINCIPAL</h3>
+            <div class="tablero">
+                <ul>
+                    <li>Cuadro estructurado de 6 filas x 6 columnas</li>
+                    <li>Números distribuidos de forma aleatoria según el nivel elegido</li>
+                    <li>Diseño visual claro, con casillas de tamaño amplio para facilitar la selección en dispositivos móviles</li>
+                </ul>
+                <div class="grid-demo">
+                    <div class="grid-cell">5</div>
+                    <div class="grid-cell">12</div>
+                    <div class="grid-cell">8</div>
+                    <div class="grid-cell">3</div>
+                    <div class="grid-cell">15</div>
+                    <div class="grid-cell">7</div>
+                </div>
+            </div>
+
+            <h3>2. SELECCIÓN DE NÚMEROS</h3>
+            <div class="tablero">
+                <ul>
+                    <li>Toque o clic sobre dos casillas para seleccionar los valores</li>
+                    <li>Los números elegidos se resaltan con color y tamaño aumentado</li>
+                    <li>Opción de deseleccionar si se elige una casilla por error</li>
+                </ul>
+            </div>
+
+            <h3>3. ELECCIÓN DE OPERACIÓN</h3>
+            <p style="margin-bottom: 15px;">Después de seleccionar los números, elige una de las opciones disponibles:</p>
+            <div>
+                <div class="operacion">➕ SUMAR</div>
+                <div class="operacion">✖️ MULTIPLICAR</div>
+                <div class="operacion">➗ DIVIDIR</div>
+                <div class="operacion">➖ RESTAR</div>
+            </div>
+            <div style="margin-top: 15px;">
+                <ul>
+                    <li><strong>Sumar:</strong> Ideal para principiantes y repaso básico</li>
+                    <li><strong>Multiplicar:</strong> Para practicar tablas y cálculos combinados</li>
+                    <li><strong>Dividir:</strong> Solo con parejas de números que generen resultados enteros</li>
+                    <li><strong>Restar:</strong> Incluida para ampliar el abanico de operaciones</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- MENSAJES -->
+        <div class="section">
+            <h2>MENSAJES DEL JUEGO</h2>
+            
+            <div class="mensaje ganador">
+                <strong>AL GANAR:</strong><br>
+                "¡Enhorabuena! Has logrado completar todos los ejercicios correctamente. ¡Sigue así!"<br>
+                <em>Incluye estadísticas: número de aciertos, tiempo empleado y nivel alcanzado</em>
+            </div>
+
+            <div class="mensaje perdedor">
+                <strong>AL PERDER:</strong><br>
+                "Has perdido, pero ¡no te preocupes! Cada intento es un paso para mejorar. Inténtalo de nuevo, tú puedes hacerlo."<br>
+                <em>Muestra ejercicios pendientes y resultados correctos para repasar</em>
+            </div>
+
+            <div class="mensaje acierto">
+                <strong>POR CADA ACIERTO:</strong><br>
+                "¡Correcto! Muy bien hecho." + Sonido positivo y animación de celebración
+            </div>
+
+            <div class="mensaje error">
+                <strong>POR CADA ERROR:</strong><br>
+                "No es correcto. El resultado adecuado es [número]. ¡Vamos, prueba de nuevo!" + Explicación breve del cálculo
+            </div>
+        </div>
+
+        <!-- OBJETIVOS -->
+        <div class="section">
+            <h2>OBJETIVOS PRINCIPALES DEL JUEGO</h2>
+            
+            <div class="destacado">
+                <h3 style="background-color: #ff9800; color: white; padding: 10px; margin: -20px -20px 15px -20px;">Objetivo General</h3>
+                <p>Mejorar las habilidades matemáticas básicas en operaciones aritméticas, fomentar la agilidad mental y aumentar la confianza en el uso de números, especialmente en personas con dificultades de aprendizaje.</p>
+            </div>
+
+            <h3>Objetivos Específicos</h3>
+            <div class="objetivo">
+                1. Facilitar el aprendizaje de operaciones básicas de forma lúdica y atractiva
+            </div>
+            <div class="objetivo">
+                2. Reducir la ansiedad matemática al presentar los cálculos en un entorno divertido
+            </div>
+            <div class="objetivo">
+                3. Adaptarse a las necesidades individuales de cada usuario
+            </div>
+            <div class="objetivo">
+                4. Mejorar la concentración y el procesamiento rápido de información numérica
+            </div>
+            <div class="objetivo">
+                5. Fomentar la autonomía y la autoevaluación en el aprendizaje
+            </div>
+            <div class="objetivo">
+                6. Proporcionar herramientas útiles para educadores y terapeutas en el trabajo con alumnos
+            </div>
+        </div>
+
+        <!-- BENEFICIOS -->
+        <div class="section">
+            <h2>BENEFICIOS PARA PERSONAS CON DIFICULTADES DE APRENDIZAJE</h2>
+            
+            <div class="beneficio">
+                <h4>Para Trastorno por Déficit de Atención e Hiperactividad (TDAH)</h4>
+                <ul>
+                    <li>Estructura clara y organizada que ayuda a mantener la concentración</li>
+                    <li>Tiempos limitados por partida que se ajustan a la capacidad de atención</li>
+                    <li>Retroalimentación instantánea que refuerza el interés y la motivación</li>
+                    <li>Diseño visual sin distracciones innecesarias</li>
+                </ul>
+            </div>
+
+            <div class="beneficio">
+                <h4>Para Dislexia Matemática (Discalculia)</h4>
+                <ul>
+                    <li>Representación concreta de los números en un cuadro estructurado</li>
+                    <li>Asociación de operaciones con íconos visuales fáciles de reconocer</li>
+                    <li>Práctica repetitiva sin presión de rendimiento</li>
+                    <li>Evita la escritura manual de cálculos, reduciendo barreras</li>
+                </ul>
+            </div>
+
+            <div class="beneficio">
+                <h4>Para Trastornos del Aprendizaje en General</h4>
+                <ul>
+                    <li>Entorno libre de juicios, con mensajes de apoyo constante</li>
+                    <li>Progreso gradual según el nivel de cada persona</li>
+                    <li>Adaptación de tiempos y dificultades a las necesidades individuales</li>
+                    <li>Uso de colores y animaciones que refuerzan la memoria visual</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+<p>Integrantes: Maximiliano Vera - Ariel Lamilla - Edison Morales</p>
+
+</body>
+</html>
