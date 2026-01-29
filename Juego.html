@@ -110,14 +110,44 @@ button{
   padding:6px;
   border-radius:8px;
 }
+
+/* ===== ANIMACIÓN GANAR ===== */
+#overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+
+#ganador{
+  background:white;
+  padding:30px 40px;
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+  animation:zoom 0.6s ease;
+}
+
+@keyframes zoom{
+  from{transform:scale(0);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
 </style>
 </head>
 
 <body>
 
+<div id="overlay">
+  <div id="ganador"></div>
+</div>
+
 <!-- ===== MENÚ ===== -->
 <div id="menu">
   <h1>🎮 Juego Matemático</h1>
+
+  <input type="text" id="nombre" placeholder="Ingresa tu nombre">
 
   <p>Operación</p>
   <select id="operacion">
@@ -133,6 +163,9 @@ button{
   </select><br>
 
   <button onclick="empezar()">Empezar</button>
+
+  <h3>🏆 Ranking</h3>
+  <ul id="ranking"></ul>
 </div>
 
 <!-- ===== JUEGO ===== -->
@@ -140,7 +173,7 @@ button{
   <h2 id="titulo"></h2>
 
   <div class="info">
-    <div>⏱️ Tiempo: <span id="tiempo">180</span>s</div>
+    <div>⏱️ Tiempo: <span id="tiempo">03:00</span></div>
     <button onclick="volverMenu()">😓 Me rindo</button>
   </div>
 
@@ -166,11 +199,17 @@ let operacion,max;
 let cartasCorrectas=0;
 let tiempo=180;
 let reloj;
+let inicio;
 
 const tablero=document.getElementById("tablero");
 
-/* ===== EMPEZAR ===== */
 function empezar(){
+  let nombre=document.getElementById("nombre").value.trim();
+  if(nombre==""){
+    alert("Por favor ingresa tu nombre");
+    return;
+  }
+
   operacion=document.getElementById("operacion").value;
   max=Number(document.getElementById("dificultad").value);
 
@@ -185,9 +224,9 @@ function empezar(){
 
   crearTablero();
   iniciarTiempo();
+  inicio=Date.now();
 }
 
-/* ===== TABLERO ===== */
 function crearTablero(){
   tablero.innerHTML="";
   seleccionadas=[];
@@ -210,7 +249,6 @@ function crearTablero(){
   }
 }
 
-/* ===== VERIFICAR ===== */
 function verificar(){
   if(seleccionadas.length!=2) return;
 
@@ -234,8 +272,10 @@ function verificar(){
 
     if(cartasCorrectas==36){
       clearInterval(reloj);
-      document.getElementById("mensaje").innerHTML=
-        "🎉 ¡Ganaste!<br><button onclick='volverMenu()'>🏠 Menú</button>";
+      let fin=Date.now();
+      let total=Math.floor((fin-inicio)/1000);
+      guardarRanking(total);
+      mostrarGanador(total);
     }
   }else{
     seleccionadas.forEach(c=>c.classList.remove("abierta"));
@@ -245,29 +285,90 @@ function verificar(){
   document.getElementById("respuesta").value="";
 }
 
-/* ===== TIEMPO ===== */
 function iniciarTiempo(){
   tiempo=180;
-  document.getElementById("tiempo").textContent=tiempo;
+  mostrarTiempo();
 
   reloj=setInterval(function(){
     tiempo--;
-    document.getElementById("tiempo").textContent=tiempo;
+    mostrarTiempo();
     if(tiempo<=0){
       clearInterval(reloj);
-      alert("⏰ Tiempo agotado");
-      volverMenu();
+      mostrarPerdedor();
+      return;
     }
   },1000);
 }
 
-/* ===== MENÚ ===== */
+function mostrarTiempo(){
+  let min=Math.floor(tiempo/60);
+  let seg=tiempo%60;
+  document.getElementById("tiempo").textContent=
+    `${String(min).padStart(2,'0')}:${String(seg).padStart(2,'0')}`;
+}
+
+function guardarRanking(seg){
+  let nombre=document.getElementById("nombre").value.trim();
+  let datos=JSON.parse(localStorage.getItem("ranking")||"[]");
+  datos.push({nombre,seg});
+  datos.sort((a,b)=>a.seg-b.seg);
+  datos=datos.slice(0,10);
+  localStorage.setItem("ranking",JSON.stringify(datos));
+  cargarRanking();
+}
+
+function cargarRanking(){
+  let lista=document.getElementById("ranking");
+  lista.innerHTML="";
+  let datos=JSON.parse(localStorage.getItem("ranking")||"[]");
+  datos.forEach((d,i)=>{
+    let li=document.createElement("li");
+    li.textContent=`${i+1}. ${d.nombre} - ${d.seg}s`;
+    lista.appendChild(li);
+  });
+}
+
+function mostrarPerdedor(){
+  document.getElementById("overlay").style.display="flex";
+  document.getElementById("ganador").innerHTML=
+    `😢 <h2>¡TIEMPO AGOTADO!</h2>
+     <p>No lograste completar el juego a tiempo</p>
+     <p>💪 ¡Inténtalo de nuevo, tú puedes!</p>
+     <button onclick="cerrarGanador()">Reintentar</button>`;
+}
+
+function mostrarPerdedor(){
+  document.getElementById("overlay").style.display="flex";
+  document.getElementById("ganador").innerHTML=
+    `😢 <h2>¡TIEMPO AGOTADO!</h2>
+     <p>No lograste completar el juego a tiempo</p>
+     <p>💪 ¡No te rindas, vuelve a intentarlo!</p>
+     <button onclick="cerrarGanador()">Reintentar</button>`;
+}
+
+function mostrarGanador(seg){
+  document.getElementById("overlay").style.display="flex";
+  document.getElementById("ganador").innerHTML=
+    `🎉 <h2>¡FELICIDADES!</h2>
+     <p>Has completado el juego en <b>${seg}</b> segundos</p>
+     <p>🏆 Revisa el ranking para ver tu posición</p>
+     <button onclick="cerrarGanador()">Aceptar</button>`;
+}
+
+function cerrarGanador(){
+  document.getElementById("overlay").style.display="none";
+  volverMenu();
+}
+
 function volverMenu(){
   clearInterval(reloj);
   document.getElementById("juego").style.display="none";
   document.getElementById("menu").style.display="block";
 }
+
+cargarRanking();
 </script>
 
 </body>
 </html>
+
